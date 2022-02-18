@@ -47,22 +47,22 @@ else
 fi
 
 errfile=$(mktemp /tmp/err.XXX)
-perfdata="$(eval "$metric_command" 2>$errfile)"
+value="$(eval "$metric_command" 2>$errfile)"
 ret=$?
 if [[ $ret -eq 0 ]]; then
-  if [[ ! $perfdata =~ [0-9][0-9]* ]]; then
-    perfdata=0
+  if [[ ! $value =~ [0-9][0-9]* ]]; then
+    value=0
     new_state=3 # UNKNOWN
     comment="\"$metric_command\" should return a number."
-  elif [[ $perfdata -lt $warn ]]; then
+  elif [[ $value -lt $warn ]]; then
     new_state=0 # OK
-  elif [[ $perfdata -lt $crit ]]; then
+  elif [[ $value -lt $crit ]]; then
     new_state=1 # WARN
   else
     new_state=2 # CRIT
   fi
 else
-  perfdata=$ret
+  value=0
   new_state=3 # UNKNOWN
   comment=$(cat $errfile)
 fi
@@ -76,6 +76,7 @@ function urlencode() {
    s/|/%7C/g; s/\}/%7D/g; s/\~/%7E/g;" | tr '\n' '#' | sed 's/#/%0A/g'
 }
 
+perfdata="value=$value"
 checkdata="servicename=$(urlencode "$servicename")&hostname=$(urlencode "$hostname")&new_state=$(urlencode "$new_state")&comment=$(urlencode "$comment")|$(urlencode "$perfdata")"
 
 token=$(curl -ksL -H 'Content-Type: application/json' -X 'application/json' -X POST -d '{"username":"'$OPSVIEW_USER'","password":"'$OPSVIEW_PASS'"}' "https://$OPSVIEW_URL/rest/login" | egrep -o '[0-9a-f]{32}')
