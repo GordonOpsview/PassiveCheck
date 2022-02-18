@@ -2,7 +2,7 @@
 
 A script to submit passive check results using curl and the REST API. Useful if run as a `cron` job on a monitored host.
 
-It requires 3 arguments: **command**, **warn** and **crit**.
+`passivecheck.sh` requires 3 arguments: **command**, **warn** and **crit**.
  - **Command**: A command or script that passivecheck.sh will run. At present, it must return a number.
  - **Warn** and **crit** are values to test the number against.
 
@@ -13,3 +13,5 @@ passivecheck.sh "ps -u bob | wc -l" 100 250
 If command returns an error or a non-number, the new service check state will be set to `UNKNOWN`, and the comment and perfdata  will describe the error.
 
 For more complex tests than number values, this script will need editing.
+
+`passivesubmitter.sh` submits a result, but doesn't do any checking itself. It should be called by a script that does a more complex check.
